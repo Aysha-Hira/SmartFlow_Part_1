@@ -13,8 +13,9 @@ package com.smartflow;
  * Event Class
  * 
  * id - Id of the event
- * eventType - type of the event (flood, etc)
+ * topic - type of the event (flood, etc)
  * location - location where the event is
+ * message - desscription of the event
  * startTime - starting time of the event
  * updateTime - time when updating details of the event
  * status - if the event has been resolved or pending
@@ -22,31 +23,37 @@ package com.smartflow;
  */
 public class Event {
     private int id;
-    private String eventType;
+    private String topic;
     private String location;
-    private long startTime;
+    private String message;
+    private long publishTime;
     private long updateTime;
     private String status = "Pending"; // default value
 
     // New Event
-    public Event(int id, String eventType, String location) {
+    public Event(int id, String topic, String location, String message) {
         this.id = id;
-        this.eventType = eventType;
+        this.topic = topic;
         this.location = location;
-        this.startTime = System.currentTimeMillis();
-        this.updateTime = startTime;
+        this.message = message;
+        this.publishTime = System.currentTimeMillis();
+        this.updateTime = publishTime;
     }
 
     public int getID() {
         return this.id;
     }
 
-    public String getEventType() {
-        return this.eventType;
+    public String getTopic() {
+        return this.topic;
     }
 
-    public long getStartTime() {
-        return this.startTime;
+    public String getMessage() {
+        return this.message;
+    }
+
+    public long getPublishTime() {
+        return this.publishTime;
     }
 
     public long getUpdateTime() {
@@ -77,9 +84,35 @@ public class Event {
     public String toString() {
         return "Event Details: " +
                 "Event Id: " + this.id +
-                "EventType:" + this.eventType +
+                "Topic:" + this.topic +
                 "Location: " + this.location +
-                "Started Time: " + this.startTime +
+                "Started Time: " + this.publishTime +
                 "Last updated Time: " + this.updateTime;
+    }
+
+    // Convert event to string for sending over network
+    public String serialize() {
+        return id + "|"
+                + topic + "|"
+                + location + "|"
+                + message + "|"
+                + status + "|"
+                + publishTime + "|"
+                + updateTime;
+    }
+
+    // Rebuild event from received string
+    public static Event deserialize(String data) {
+        String[] parts = data.split("\\|");
+        Event event = new Event(
+                Integer.parseInt(parts[0]), // id
+                parts[1], // topic
+                parts[2], // location
+                parts[3] // message
+        );
+        event.status = parts[4];
+        event.publishTime = Long.parseLong(parts[5]);
+        event.updateTime = Long.parseLong(parts[6]);
+        return event;
     }
 }
