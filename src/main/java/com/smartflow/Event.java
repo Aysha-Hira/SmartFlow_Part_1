@@ -56,7 +56,7 @@ public class Event {
         return this.publishTime;
     }
 
-    public long getUpdateTime() {
+    public long getsetLeastUpdatedTime() {
         return this.updateTime;
     }
 
@@ -76,8 +76,16 @@ public class Event {
         return this.status = "Resolved";
     }
 
-    public void updateTime() {
+    public void setStartTime(long publishTime) {
+        this.publishTime = publishTime;
+    }
+
+    public void setLeastUpdatedTime() {
         this.updateTime = System.currentTimeMillis();
+    }
+
+    public void setLeastUpdatedTime(long updateTime) {
+        this.updateTime = updateTime;
     }
 
     @Override
