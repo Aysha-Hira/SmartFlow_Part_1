@@ -31,11 +31,17 @@ public class QuicProtocolConnection implements ApplicationProtocolConnection {
             // Read the full message sent by the client through the stream
             String message = MessageUtil.readAll(stream.getInputStream());
 
-            String topic = MessageUtil.getTopic(message);
+            // Gets the type of the message (PUBLISH, SUBSCRIBE, UNSUBSCRIBE) and the topic
+            // from the message
+            String requestType = MessageUtil.classifyMessage(message);
 
-            switch (MessageUtil.classifyMessage(message)) {
+            // Extract the topic from the message based on the request type (PUBLISH,
+            // SUBSCRIBE, UNSUBSCRIBE)
+            String topic = MessageUtil.getTopic(message, requestType.length());
+
+            switch (requestType) {
                 case "PUBLISH":
-                    Event event = extractEventDetailsFromMessage(message);
+                    Event event = extractEventDetailsFromMessage(message, requestType.length());
                     EventBroker.deliverEvent(event);
                     MessageUtil.writeText(stream.getOutputStream(), "ACK");
                     break;
@@ -68,8 +74,9 @@ public class QuicProtocolConnection implements ApplicationProtocolConnection {
         }
     }
 
-    public Event extractEventDetailsFromMessage(String message) {
-        String[] parts = message.split("\\|");
+    public Event extractEventDetailsFromMessage(String message, int requestType) {
+        String messageWithoutRequestType = message.substring(++requestType).trim(); // Remove the request type from the message
+        String[] parts = messageWithoutRequestType.split("\\|");
         Event event = new Event(
                 Integer.parseInt(parts[0]), // id
                 parts[1], // topic
@@ -77,14 +84,14 @@ public class QuicProtocolConnection implements ApplicationProtocolConnection {
                 parts[3] // message
         );
 
-        if (parts[4] == "Pending")
+        if (parts[4].equals("Pending"))
             event.setAsPending();
 
-        else if (parts[4] == "Resolved")
+        else if (parts[4].equals("Resolved"))
             event.setAsResolved();
 
         event.setStartTime(Long.parseLong(parts[5]));
-        event.setLeastUpdatedTime(Long.parseLong(parts[6]));
+        event.setLastUpdatedTime(Long.parseLong(parts[6]));
         return event;
     }
 }
