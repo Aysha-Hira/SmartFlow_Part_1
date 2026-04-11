@@ -12,7 +12,7 @@ public final class MessageUtil {
 
     private MessageUtil() {
     }
- 
+
     public static String readAll(InputStream input) throws IOException {
         // Wrap input stream so we can read text line by line (UTF-8 encoding)
         BufferedReader reader = new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8));
@@ -45,14 +45,14 @@ public final class MessageUtil {
     // Checks if the message is PUBLIC or SUBSCRIBE or UNSUBSCRIBE, and sends it to
     public static String classifyMessage(String message) {
 
-        if (message.contains("PUBLISH"))
+        if (message.startsWith("PUBLISH"))
             return "PUBLISH";
 
-        if (message.contains("SUBSCRIBE"))
-            return "SUBSCRIBE";
-
-        if (message.contains("UNSUBSCRIBE"))
+        if (message.startsWith("UNSUBSCRIBE"))
             return "UNSUBSCRIBE";
+
+        if (message.startsWith("SUBSCRIBE"))
+            return "SUBSCRIBE";
 
         return "UNKNOWN REQUEST"; // If no known pattern is found
     }
@@ -60,10 +60,12 @@ public final class MessageUtil {
     // Extracts topic from message
     // "SUBSCRIBE TRAFFIC.accident" → "TRAFFIC.accident"
     // "PUBLISH TRAFFIC.accident | Location | Message" → "TRAFFIC.accident"
-    public static String getTopic(String message) {
-        String[] parts = message.trim().split(" ");
-        if (parts.length >= 2)
-            return parts[1].split("\\|")[0].trim(); // gets the first part (topic) regardless of the request
-        return "";
+    public static String getTopic(String message, int requestType) {
+        // Remove the request type (PUBLISH, SUBSCRIBE, UNSUBSCRIBE) from the message
+        String messageWithoutRequest = message.substring(requestType + 1).trim();
+
+        // Split the remaining message by '|'
+        String[] parts = messageWithoutRequest.trim().split("\\|");
+        return parts[0].trim(); // Return the topic (first part of the message)
     }
 }
