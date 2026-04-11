@@ -56,7 +56,7 @@ public class Event {
         return this.publishTime;
     }
 
-    public long getsetLeastUpdatedTime() {
+    public long getLastUpdatedTime() {
         return this.updateTime;
     }
 
@@ -80,11 +80,11 @@ public class Event {
         this.publishTime = publishTime;
     }
 
-    public void setLeastUpdatedTime() {
+    public void setLastUpdatedTime() {
         this.updateTime = System.currentTimeMillis();
     }
 
-    public void setLeastUpdatedTime(long updateTime) {
+    public void setLastUpdatedTime(long updateTime) {
         this.updateTime = updateTime;
     }
 
