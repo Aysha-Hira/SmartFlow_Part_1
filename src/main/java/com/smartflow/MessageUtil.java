@@ -41,6 +41,11 @@ public final class MessageUtil {
         writer.flush(); // Make sure data is actually sent
         // output.close(); // Close the connection/output stream
     }
+    
+    public static String format(String topic, String publisher_id, String payload) {
+    	String message = publisher_id + "|" + System.currentTimeMillis() + "|" + topic + "|" + payload;
+    	return message;
+    }
 
     // Checks if the message is PUBLIC or SUBSCRIBE or UNSUBSCRIBE, and sends it to
     public static String classifyMessage(String message) {
