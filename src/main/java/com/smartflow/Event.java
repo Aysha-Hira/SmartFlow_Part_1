@@ -112,8 +112,7 @@ public class Event {
     // Rebuild event from received string
     public static Event deserialize(String data) {
         String[] parts = data.split("\\|");
-        Event event = new Event(
-                Integer.parseInt(parts[0]), // id
+        Event event = new Event(Integer.parseInt(parts[0]), // id
                 parts[1], // topic
                 parts[2], // location
                 parts[3] // message
