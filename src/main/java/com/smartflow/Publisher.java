@@ -51,6 +51,17 @@ public abstract class Publisher {
 	}
 
 	public void publish() {
+		// Check connection is alive
+		if (connection == null || !connection.isConnected()) {
+			System.out.println(publisher_id + ": reconnecting...");
+			try {
+				connect();
+			} catch (Exception e) {
+				System.out.println(publisher_id + ": reconnect failed");
+				return;
+			}
+		}
+
 		String topic = generateTopic();
 		String payload = generateContent(topic);
 		String location = getLocation();
