@@ -3,7 +3,7 @@ package com.smartflow;
 import java.util.Random;
 
 public class Traffic extends Publisher {
-	private static int currentid = 0;
+	private static int currentid = 1;
 	
 	static String topics[] = {"ACCIDENT", "HAZARD", "CONGESTION", "ROAD_CLOSURE", "EMERGENCY_VEHICLES"};
 	

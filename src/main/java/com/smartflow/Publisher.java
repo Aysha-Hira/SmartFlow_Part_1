@@ -51,7 +51,7 @@ public abstract class Publisher {
 	}
 
 	public void publish() {
-		// Check connection is alive
+		// Check if connected
 		if (connection == null || !connection.isConnected()) {
 			System.out.println(publisher_id + ": reconnecting...");
 			try {
