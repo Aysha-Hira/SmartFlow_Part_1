@@ -7,11 +7,41 @@ public class Traffic extends Publisher {
 	
 	static String topics[] = {"ACCIDENT", "HAZARD", "CONGESTION", "ROAD_CLOSURE", "EMERGENCY_VEHICLES"};
 	
-	static String accident_payloads[];
-	static String hazard_payloads[];
-	static String congestion_payloads[];
-	static String road_closure_payloads[];
-	static String emergency_vehicles_payloads[];
+	static String accident_payloads[] = {
+		    "Minor rear-end collision reported",
+		    "Two-car accident blocking right lane",
+		    "Multi-vehicle crash causing delays",
+		    "Accident near intersection, expect slowdowns",
+		    "Vehicle rollover reported, emergency crews on site"
+		};
+	static String hazard_payloads[] = {
+		    "Debris detected on roadway",
+		    "Oil spill causing slippery conditions",
+		    "Fallen object blocking lane",
+		    "Pothole hazard reported",
+		    "Construction materials scattered on road"
+		};
+	static String congestion_payloads[] = {
+		    "Heavy traffic due to peak hours",
+		    "Slow-moving traffic ahead",
+		    "Severe congestion near city center",
+		    "Traffic buildup reported on main highway",
+		    "Delays expected due to high volume"
+		};
+	static String road_closure_payloads[] = {
+		    "Road closed for maintenance work",
+		    "Temporary closure due to flooding",
+		    "Lane closure for construction",
+		    "Road blocked due to earlier accident",
+		    "Detour in place — follow signs"
+		};
+	static String emergency_vehicles_payloads[] = {
+		    "Ambulance en route — clear the way",
+		    "Fire truck responding to incident",
+		    "Police vehicles approaching area",
+		    "Emergency convoy passing through",
+		    "Rescue team deployed to nearby location"
+		};
 	
 	Random rand = new Random();
 
