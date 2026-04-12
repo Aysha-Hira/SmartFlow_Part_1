@@ -73,18 +73,17 @@ public class EventBroker {
 				.build();
 
 		// Register the application protocol and connection factory
-		connector.registerApplicationProtocol("SmartFlow", new QuicProtocolFactory());
+		connector.registerApplicationProtocol(Protocol.PROTOCOL, new QuicProtocolFactory());
 
 		// Start the QUIC server
 		connector.start();
 
 		// Print status messages to show server is running
-		System.out.println(
-				"""
-						===============================================================
-						                      Welcome to SMARTFLOW
-						===============================================================
-						""");
+		System.out.println("""
+				===============================================================
+				                      Welcome to SMARTFLOW
+				===============================================================
+				""");
 		System.out.println("Abu Dhabi Smart Mobility Control Center QUIC server started on port " + PORT);
 
 	}
@@ -132,7 +131,7 @@ public class EventBroker {
 		} catch (Exception e) {
 			System.out.println("Error removing subscriber for topic: " + topic);
 		}
-		
+
 	}
 
 	public static void addTopic(String topic) {
