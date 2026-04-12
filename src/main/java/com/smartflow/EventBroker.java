@@ -37,14 +37,9 @@ public class EventBroker {
 	private static final String CERT_ALIAS = "smartflow";
 
 	// for storring events
-	private static Map<String, List<OutputStream>> subscribers = new ConcurrentHashMap<>();
+	private static Map<String, List<OutputStream>> subscriptionDB = new ConcurrentHashMap<>();
 
 	public static void main(String[] args) throws Exception {
-
-		// subscribers.put("TRAFFIC.accident", null);
-		// subscribers.put("WEATHER.sandstorm", null);
-		// subscribers.put("ELECTRICITY.outage", null);
-		// subscribers.put("OTHERS", null);
 
 		// Create a keystore object to store the server certificate
 		KeyStore keyStore = KeyStore.getInstance("JKS");
@@ -77,36 +72,27 @@ public class EventBroker {
 
 		// Start the QUIC server
 		connector.start();
-
+		System.out.println(" Broker started on port " + PORT);
 		// Print status messages to show server is running
 		System.out.println("""
 				===============================================================
 				                      Welcome to SMARTFLOW
 				===============================================================
 				""");
-		System.out.println("Abu Dhabi Smart Mobility Control Center QUIC server started on port " + PORT);
 
 	}
 
-	// // Based on the message recieved
-	// public static void addSuscriber(String topic, OutputStream out) {
-	// subscribers.computeIfAbsent(topic, k -> new
-	// CopyOnWriteArrayList<>()).add(out);
-	// sendEvents(topic);
-	// }
-
-	// // Example: "SUBSCRIBE TRAFFIC.accident"
-	// public static List<OutputStream> sendEvents(String topic) {
-	// return subscribers.get(topic);
-	// }
-
+	// Adds a new subscriber for a specific topic by storing their output stream in
+	// the subscribers map
 	public static void addSubscriber(String topic, OutputStream out) {
-		subscribers.computeIfAbsent(topic, k -> new CopyOnWriteArrayList<>()).add(out);
+		subscriptionDB.computeIfAbsent(topic, k -> new CopyOnWriteArrayList<>()).add(out);
 		System.out.println("Subscriber added for topic: " + topic);
 	}
 
+	// Delivers an event to all subscribers of the event's topic by writing the
+	// event
 	public static void deliverEvent(Event event) {
-		CopyOnWriteArrayList<OutputStream> list = (CopyOnWriteArrayList<OutputStream>) subscribers
+		CopyOnWriteArrayList<OutputStream> list = (CopyOnWriteArrayList<OutputStream>) subscriptionDB
 				.get(event.getTopic());
 
 		if (list == null || list.isEmpty()) {
@@ -123,10 +109,12 @@ public class EventBroker {
 
 	}
 
+	// Removes a subscriber from a specific topic by removing their output stream
+	// from the subscribers map
 	public static void removeSubscriber(String topic, OutputStream out) {
 
 		try {
-			subscribers.get(topic).remove(out);
+			subscriptionDB.get(topic).remove(out);
 			System.out.println("Subscriber removed for topic: " + topic);
 		} catch (Exception e) {
 			System.out.println("Error removing subscriber for topic: " + topic);
@@ -135,7 +123,7 @@ public class EventBroker {
 	}
 
 	public static void addTopic(String topic) {
-		subscribers.putIfAbsent(topic, new CopyOnWriteArrayList<>());
+		subscriptionDB.putIfAbsent(topic, new CopyOnWriteArrayList<>());
 		System.out.println("Topic added: " + topic);
 	}
 
