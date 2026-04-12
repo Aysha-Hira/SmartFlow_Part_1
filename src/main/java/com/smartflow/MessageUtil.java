@@ -33,18 +33,31 @@ public final class MessageUtil {
         return sb.toString(); // Return complete message as a single string
     }
 
+    public static String readLine(InputStream input) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8));
+        return reader.readLine(); // reads ONE line then returns
+    }
+
     public static void writeText(OutputStream output, String text) throws IOException {
         // Create writer to send text using UTF-8 encoding
         PrintWriter writer = new PrintWriter(output, false, StandardCharsets.UTF_8);
-
         writer.println(text); // Send the text (adds newline at the end)
         writer.flush(); // Make sure data is actually sent
         // output.close(); // Close the connection/output stream
     }
-    
-    public static String format(String topic, String publisher_id, String payload) {
-    	String message = publisher_id + "|" + System.currentTimeMillis() + "|" + topic + "|" + payload;
-    	return message;
+
+    private static int eventIdCounter = 0;
+
+    public static String format(String publisherId, String topic, String location, String payload) {
+        long now = System.currentTimeMillis();
+        String eventData = eventIdCounter++ + "|" // id
+                + topic + "|" // topic
+                + location + "|" // location
+                + payload + "|" // message
+                + "Pending|" // status
+                + now + "|" // publishTime
+                + now; // updateTime
+        return "PUBLISH " + eventData;
     }
 
     // Checks if the message is PUBLIC or SUBSCRIBE or UNSUBSCRIBE, and sends it to
@@ -64,13 +77,20 @@ public final class MessageUtil {
 
     // Extracts topic from message
     // "SUBSCRIBE TRAFFIC.accident" → "TRAFFIC.accident"
-    // "PUBLISH TRAFFIC.accident | Location | Message" → "TRAFFIC.accident"
+    // "PUBLISH | 101 | TRAFFIC.accident | Location | Message" → "TRAFFIC.accident"
     public static String getTopic(String message, int requestType) {
         // Remove the request type (PUBLISH, SUBSCRIBE, UNSUBSCRIBE) from the message
         String messageWithoutRequest = message.substring(requestType + 1).trim();
 
         // Split the remaining message by '|'
         String[] parts = messageWithoutRequest.trim().split("\\|");
-        return parts[0].trim(); // Return the topic (first part of the message)
+
+        // For Publsh request
+        if (message.startsWith("PUBLISH"))
+            // Since sending an event, we need id, so the first part is the id and the
+            // second part is the topic
+            return parts[1].trim();
+        return parts[0].trim();
     }
+
 }
