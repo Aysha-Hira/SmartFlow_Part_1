@@ -1,10 +1,4 @@
-<<<<<<< Updated upstream
-package com.smartflow;
 
-public class Subscriber {
-
-}
-=======
 /**
  * Section: 104
 
@@ -36,15 +30,15 @@ public class Subscriber {
     protected String subscriberId;
     protected QuicClientConnection connection;
     protected SysOutLogger logger;
-    
+
     // Track subscribed topics and their corresponding streams
     protected Set<String> subscribedTopics = new CopyOnWriteArraySet<>();
     protected Map<String, QuicStream> topicStreams = new ConcurrentHashMap<>();
     protected Map<String, Thread> listenerThreads = new ConcurrentHashMap<>();
-    
+
     // Latency tracker
     protected LatencyTracker latencyTracker;
-    
+
     // Connection status
     protected AtomicBoolean isConnected = new AtomicBoolean(false);
     protected AtomicBoolean isRunning = new AtomicBoolean(true);
@@ -63,19 +57,19 @@ public class Subscriber {
         logger.logWarning(false);
 
         try {
-			connection = QuicClientConnection.newBuilder()
-			        .uri(URI.create("https://localhost:" + EventBroker.PORT))
-			        .applicationProtocol(Protocol.PROTOCOL)
-			        .noServerCertificateCheck()
-			        .logger(logger)
-			        .build();
-		} catch (SocketException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+            connection = QuicClientConnection.newBuilder()
+                    .uri(URI.create("https://localhost:" + EventBroker.PORT))
+                    .applicationProtocol(Protocol.PROTOCOL)
+                    .noServerCertificateCheck()
+                    .logger(logger)
+                    .build();
+        } catch (SocketException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (UnknownHostException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
         System.out.println("--------------------------------------------------------------- ");
         System.out.println(subscriberId + " connecting to Smart Flow Smart City System...");
@@ -112,31 +106,31 @@ public class Subscriber {
         try {
             // Create a new stream for this subscription (bidirectional)
             QuicStream stream = connection.createStream(true);
-            
+
             // Create subscription message
             String msg = "SUBSCRIBE " + topic;
             String msgWithHMAC = SecurityUtils.addHMACValue(msg);
-            
+
             System.out.println("Sending subscription: " + msgWithHMAC);
             MessageUtil.writeText(stream.getOutputStream(), msgWithHMAC);
-            
+
             // Read ACK response
             String response = MessageUtil.readLine(stream.getInputStream());
             System.out.println("Received from server: " + response);
-            
+
             if (response != null && response.equals("ACK")) {
                 subscribedTopics.add(topic);
                 topicStreams.put(topic, stream);
-                
+
                 // Start listener thread for this stream
                 startListener(stream, topic);
-                
+
                 System.out.println(subscriberId + " successfully subscribed to: " + topic);
             } else {
                 System.err.println(subscriberId + " subscription failed for: " + topic);
                 stream.resetStream(0);
             }
-            
+
         } catch (IOException e) {
             System.out.println(subscriberId + " subscribe error: " + e.getMessage());
         }
@@ -164,18 +158,18 @@ public class Subscriber {
     private void startListener(QuicStream stream, String topic) {
         Thread listenerThread = new Thread(() -> {
             System.out.println(subscriberId + " started listening for: " + topic);
-            
+
             try {
                 // Keep reading events as long as we're connected and subscribed
                 while (isConnected.get() && isRunning.get() && subscribedTopics.contains(topic)) {
                     // This blocks until an event arrives or stream closes
                     String eventData = MessageUtil.readLine(stream.getInputStream());
-                    
+
                     if (eventData == null || eventData.isEmpty()) {
                         // Stream closed or end of stream
                         break;
                     }
-                    
+
                     // Process the received event
                     processEvent(eventData, topic);
                 }
@@ -187,7 +181,7 @@ public class Subscriber {
                 System.out.println(subscriberId + " stopped listening for: " + topic);
             }
         });
-        
+
         listenerThread.setDaemon(true);
         listenerThread.start();
         listenerThreads.put(topic, listenerThread);
@@ -200,18 +194,18 @@ public class Subscriber {
         try {
             long receiveTimeNanos = System.nanoTime();
             long receiveTimeMs = System.currentTimeMillis();
-            
+
             // Deserialize event using your Event class
             Event event = Event.deserialize(eventData);
-            
+
             // Calculate latency in microseconds
             long publishTimeMs = event.getPublishTime();
             long latencyMs = receiveTimeMs - publishTimeMs;
             long latencyNanos = latencyMs * 1_000_000;
-            
+
             // Record latency
             latencyTracker.recordLatency(topic, latencyNanos);
-            
+
             // Print event details (can be disabled in simulation for performance)
             System.out.println("\n[Event Received] " + subscriberId + " on [" + topic + "]:");
             System.out.println("  ID: " + event.getID());
@@ -219,7 +213,7 @@ public class Subscriber {
             System.out.println("  Message: " + event.getMessage());
             System.out.println("  Status: " + event.getStatus());
             System.out.println("  Latency: " + latencyMs + " ms");
-            
+
         } catch (Exception e) {
             System.err.println(subscriberId + " failed to process event: " + e.getMessage());
         }
@@ -232,34 +226,34 @@ public class Subscriber {
         if (!subscribedTopics.contains(topic)) {
             return;
         }
-        
+
         System.out.println(subscriberId + " unsubscribing from: " + topic);
-        
+
         QuicStream stream = topicStreams.get(topic);
         if (stream != null) {
             try {
                 String msg = "UNSUBSCRIBE " + topic;
                 String msgWithHMAC = SecurityUtils.addHMACValue(msg);
                 MessageUtil.writeText(stream.getOutputStream(), msgWithHMAC);
-                
+
                 String response = MessageUtil.readLine(stream.getInputStream());
                 System.out.println("Unsubscribe response: " + response);
-                
+
                 stream.resetStream(0);
             } catch (IOException e) {
                 System.out.println(subscriberId + " unsubscribe error: " + e.getMessage());
             }
         }
-        
+
         // Stop listener thread
         Thread listener = listenerThreads.remove(topic);
         if (listener != null) {
             listener.interrupt();
         }
-        
+
         subscribedTopics.remove(topic);
         topicStreams.remove(topic);
-        
+
         System.out.println(subscriberId + " unsubscribed from: " + topic);
     }
 
@@ -305,22 +299,21 @@ public class Subscriber {
         if (!isConnected.get()) {
             return;
         }
-        
+
         System.out.println(subscriberId + " disconnecting...");
         isRunning.set(false);
-        
+
         // Unsubscribe from all topics
         for (String topic : new CopyOnWriteArraySet<>(subscribedTopics)) {
             unsubscribe(topic);
         }
-        
+
         // Close connection
         if (connection != null) {
             connection.close();
         }
-        
+
         isConnected.set(false);
         System.out.println(subscriberId + " disconnected.");
     }
 }
->>>>>>> Stashed changes
