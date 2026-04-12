@@ -30,8 +30,6 @@ public class QuicProtocolConnection implements ApplicationProtocolConnection {
         try {
             // Read the full message sent by the client through the stream
             String message = (MessageUtil.readLine(stream.getInputStream()));
-            System.out.println("Raw received: " + message);
-
             String cleanMessage = SecurityUtils.verifyAndStrip(message);
             if (cleanMessage == null) {
                 System.out.println("HMAC verification failed!");
@@ -51,12 +49,13 @@ public class QuicProtocolConnection implements ApplicationProtocolConnection {
             switch (requestType) {
                 case "PUBLISH":
                     Event event = extractEventDetailsFromMessage(message, requestType.length());
-                    System.out.println("extracted details");
+
                     EventBroker.deliverEvent(event);
-                    System.out.println("delivered event");
+
                     MessageUtil.writeText(stream.getOutputStream(), "ACK");
-                    System.out.println("sent ACK, sleeping");
+
                     Thread.sleep(100);
+                    System.err.println();
                     stream.resetStream(0);
                     break;
 
