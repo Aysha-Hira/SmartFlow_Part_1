@@ -53,8 +53,7 @@ public class Traffic extends Publisher {
 
 	@Override
 	protected String getLocation() {
-		String[] locations = { "Downtown", "Highway 101", "Main Street", "5th Avenue", "Broadway" }; // example
-																										// locations
+		String[] locations = { "Downtown", "Highway 101", "Main Street", "5th Avenue", "Broadway" };
 		return locations[rand.nextInt(locations.length)];
 	}
 
