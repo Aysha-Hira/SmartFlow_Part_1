@@ -99,6 +99,9 @@ public class EventBroker {
 			System.out.println("No subscribers for: " + event.getTopic());
 			return;
 		}
+		else {
+			System.out.println(list.size() + " subscribers found for: " + event.getTopic());
+		}
 		for (OutputStream out : list) {
 			try {
 				MessageUtil.writeText(out, event.serialize());
